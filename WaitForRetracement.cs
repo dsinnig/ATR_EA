@@ -100,7 +100,7 @@ namespace biiuse
 
                     trade.addLogEntry("Limit order successfully placed. Initial Profit target is: " + mql4.DoubleToString(trade.getInitialProfitTarget(), mql4.Digits) + " (" + (mql4.IntegerToString((int)(mql4.MathAbs(trade.getInitialProfitTarget() - trade.getPlannedEntry()) * OrderManager.getPipConversionFactor(mql4)))) + ") pips", true);
 
-                    trade.addLogEntry(1, "Trade Details",
+                    trade.addLogEntry(2, "Trade Details",
                                                       "AccountBalance: $" + mql4.DoubleToString(mql4.AccountBalance(), 2), "\n",
                                                       "Risk Capital: $" + mql4.DoubleToString(riskCapital, 2), "\n",
                                                       "Risk pips: " + mql4.DoubleToString(riskPips, 2) + " micro pips", "\n",
