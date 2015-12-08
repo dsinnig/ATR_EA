@@ -39,7 +39,7 @@ namespace biiuse
         private double entryLevel; 
 
         public ATRTrade(string _strategyLabel, bool sim, int _lotDigits, string _logFileName, double _newHHLL, double _ATR, int _lengthIn1MBarsOfWaitingPeriod, double _percentageOfATRForMaxRisk, double _percentageOfATRForMaxVolatility,
-            double _minProfitTarget, int _rangeBufferInMicroPips, double _rangeRestriction, double _tenDayRange, Session referenceSession, double _maxBalanceRisk, double _entryLevel, MqlApi mql4) : base(_strategyLabel, sim, _lotDigits, _logFileName, mql4)
+            double _minProfitTarget, int _rangeBufferInMicroPips, double _rangeRestriction, double _tenDayRange, Session referenceSession, double _maxBalanceRisk, double _entryLevel, int _emailNotificationLevel, MqlApi mql4) : base(_strategyLabel, sim, _lotDigits, _logFileName, _emailNotificationLevel, mql4)
         {
             this.newHHLL = _newHHLL;
             this.atr = _ATR;

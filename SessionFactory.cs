@@ -11,7 +11,7 @@ namespace biiuse
     {
         
         //This will only work for FXCM properly. Or any broker with exactly 5 trading days. 
-        public static Session getCurrentSession(int aLengthOfSundaySession, int aHHLL_Threshold, int lookBackSessions, ATR_Type atrType, string _strategyLabel, MqlApi mql4)
+        public static Session getCurrentSession(int aLengthOfSundaySession, int aHHLL_Threshold, int lookBackSessions, ATR_Type atrType, string _strategyLabel, int emailNotificationLevel, MqlApi mql4)
         {
             //TODO Change Session length determination logic
             int aLengthOfSundaySessionInHours = TimeSpan.FromSeconds(aLengthOfSundaySession).Hours;
@@ -41,7 +41,7 @@ namespace biiuse
                         {
                             System.DateTime dailyBarStart = mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 0); 
                             ///Take out session end time. It's hard to calculate and not used currently. 
-                            currentSession = new Session(_strategyLabel, 1, "MONDAY", mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 0), new DateTime(), mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 0) - TimeSpan.FromDays(lookBackSessions+weekEndDelay), true, aHHLL_Threshold, atrType, mql4);
+                            currentSession = new Session(_strategyLabel, 1, "MONDAY", mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 0), new DateTime(), mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 0) - TimeSpan.FromDays(lookBackSessions+weekEndDelay), true, aHHLL_Threshold, atrType, emailNotificationLevel, mql4);
                         }
                         break;
                     }
@@ -50,7 +50,7 @@ namespace biiuse
                         if ((currentSession == null) || (currentSession.getID() != 2))
                         {
                             ///Take out session end time. It's hard to calculate and not used currently. 
-                            currentSession = new Session(_strategyLabel, 2, "TUESDAY", mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 0), new DateTime(), mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 1) - TimeSpan.FromDays(lookBackSessions + weekEndDelay-1), true, aHHLL_Threshold, atrType, mql4);
+                            currentSession = new Session(_strategyLabel, 2, "TUESDAY", mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 0), new DateTime(), mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 1) - TimeSpan.FromDays(lookBackSessions + weekEndDelay-1), true, aHHLL_Threshold, atrType, emailNotificationLevel, mql4);
                         }
                         break;
 
@@ -60,7 +60,7 @@ namespace biiuse
                         if ((currentSession == null) || (currentSession.getID() != 3))
                         {
                             ///Take out session end time. It's hard to calculate and not used currently. 
-                            currentSession = new Session(_strategyLabel, 3, "WEDNESDAY", mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 0), new DateTime(), mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 1) - TimeSpan.FromDays(lookBackSessions + weekEndDelay-1), true, aHHLL_Threshold, atrType, mql4);
+                            currentSession = new Session(_strategyLabel, 3, "WEDNESDAY", mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 0), new DateTime(), mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 1) - TimeSpan.FromDays(lookBackSessions + weekEndDelay-1), true, aHHLL_Threshold, atrType, emailNotificationLevel, mql4);
                         }
                         break;
 
@@ -70,7 +70,7 @@ namespace biiuse
                         if ((currentSession == null) || (currentSession.getID() != 4))
                         {
                             ///Take out session end time. It's hard to calculate and not used currently. 
-                            currentSession = new Session(_strategyLabel, 4, "THURSDAY", mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 0), new DateTime(), mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 1) - TimeSpan.FromDays(lookBackSessions + weekEndDelay-1), true, aHHLL_Threshold, atrType, mql4);
+                            currentSession = new Session(_strategyLabel, 4, "THURSDAY", mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 0), new DateTime(), mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 1) - TimeSpan.FromDays(lookBackSessions + weekEndDelay-1), true, aHHLL_Threshold, atrType, emailNotificationLevel, mql4);
                         }
                         break;
 
@@ -80,7 +80,7 @@ namespace biiuse
                         if ((currentSession == null) || (currentSession.getID() != 5))
                         {
                             ///Take out session end time. It's hard to calculate and not used currently. 
-                            currentSession = new Session(_strategyLabel, 5, "FRIDAY", mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 0), new DateTime(), mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 1) - TimeSpan.FromDays(lookBackSessions + weekEndDelay-1), true, aHHLL_Threshold, atrType, mql4);
+                            currentSession = new Session(_strategyLabel, 5, "FRIDAY", mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 0), new DateTime(), mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_D1, 1) - TimeSpan.FromDays(lookBackSessions + weekEndDelay-1), true, aHHLL_Threshold, atrType, emailNotificationLevel, mql4);
                         }
                             break;
                     }
@@ -89,7 +89,7 @@ namespace biiuse
                     {
                         if ((currentSession == null) || (currentSession.getID() != -1))
                         {
-                            currentSession = new Session(_strategyLabel , - 1, "UNKNOWN", new DateTime(), new DateTime(), new DateTime(), false, 0, atrType, mql4);
+                            currentSession = new Session(_strategyLabel , - 1, "UNKNOWN", new DateTime(), new DateTime(), new DateTime(), false, 0, atrType, emailNotificationLevel, mql4);
                         }
                             break;
                     }

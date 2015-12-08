@@ -34,7 +34,7 @@ namespace biiuse
             {
                 if (mql4.Bid > retracementLevel)
                 {
-                    trade.addLogEntry(true, "Retracement complete - placing SELL stop order");
+                    trade.addLogEntry(2, "Retracement complete - placing SELL stop order");
                     nextState = new StopSellOrderOpened(trade, mql4);
                     entryPrice = retracementLevel - ((stopLoss- retracementLevel) * trade.getEntryLevel());
                     initialProfitTarget = retracementLevel - ((stopLoss - retracementLevel) * trade.getMinProfitTarget());
@@ -47,7 +47,7 @@ namespace biiuse
 
                 if (mql4.Bid < cancelPrice)
                 {
-                    trade.addLogEntry(true, "Bid price went below cancel level - close trade");
+                    trade.addLogEntry(2, "Bid price went below cancel level - close trade");
                     trade.setState(new TradeClosed(trade, mql4));
                     return;
                 }
@@ -57,7 +57,7 @@ namespace biiuse
 
                 if (mql4.Ask < retracementLevel)
                 {
-                    trade.addLogEntry(true, "Retracement complete - placing BUY stop order");
+                    trade.addLogEntry(2, "Retracement complete - placing BUY stop order");
                     nextState = new StopBuyOrderOpened(trade, mql4);
                     entryPrice = retracementLevel + ((retracementLevel - stopLoss) * trade.getEntryLevel());
                     initialProfitTarget = retracementLevel + ((retracementLevel - stopLoss)) * trade.getMinProfitTarget();
@@ -68,7 +68,7 @@ namespace biiuse
 
                 if (mql4.Ask > cancelPrice)
                 {
-                    trade.addLogEntry(true, "Ask price went above cancel level - close trade");
+                    trade.addLogEntry(2, "Ask price went above cancel level - close trade");
                     trade.setState(new TradeClosed(trade, mql4));
                     return;
                 }
@@ -100,7 +100,7 @@ namespace biiuse
 
                     trade.addLogEntry("Limit order successfully placed. Initial Profit target is: " + mql4.DoubleToString(trade.getInitialProfitTarget(), mql4.Digits) + " (" + (mql4.IntegerToString((int)(mql4.MathAbs(trade.getInitialProfitTarget() - trade.getPlannedEntry()) * OrderManager.getPipConversionFactor(mql4)))) + ") pips", true);
 
-                    trade.addLogEntry(true, "Trade Details",
+                    trade.addLogEntry(2, "Trade Details",
                                                       "AccountBalance: $" + mql4.DoubleToString(mql4.AccountBalance(), 2), "\n",
                                                       "Risk Capital: $" + mql4.DoubleToString(riskCapital, 2), "\n",
                                                       "Risk pips: " + mql4.DoubleToString(riskPips, 2) + " micro pips", "\n",

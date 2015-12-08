@@ -51,6 +51,8 @@ namespace biiuse
         [ExternVariable]
         public bool cutLossesBeforeATRFilter = true; //min percent value for ATR / OR
         [ExternVariable]
+        public int emailNotificationLevel = 5; //the higher the more email messages will be sent out
+        [ExternVariable]
         public string logFileName = "tradeLog.csv"; //path and filename for CSV trade log
 
         public override int init()
@@ -80,7 +82,7 @@ namespace biiuse
                 //TODO verify that identity makes it still work
                 bartime = Time[0];
 
-                Session newSession = SessionFactory.getCurrentSession(sundayLengthInSeconds, HHLL_Threshold, lookBackSessions, atrType, strategyLabel, this);
+                Session newSession = SessionFactory.getCurrentSession(sundayLengthInSeconds, HHLL_Threshold, lookBackSessions, atrType, strategyLabel, emailNotificationLevel, this);
                 if (currSession != newSession)
                 {
                     currSession = newSession;
@@ -88,7 +90,7 @@ namespace biiuse
                     currSession.writeToCSV("session_atr.csv");
                     if (!currSession.tradingAllowed())
                     {
-                        currSession.addLogEntry(true, "ATTENTION: Session could not be established", "\n", "Trading is disabled. Check log for details");
+                        currSession.addLogEntry(1, "ATTENTION: Session could not be established", "\n", "Trading is disabled. Check log for details");
                     }
                     else
                     {
@@ -119,7 +121,7 @@ namespace biiuse
                             sessionStatus = "ATR and ATR/OR are within range. Trades may be triggered in this sessions";
                         }
 
-                        currSession.addLogEntry(true, "New Trading Session Established",
+                        currSession.addLogEntry(2, "New Trading Session Established",
                                                       "Session name: ", currSession.getName(), "\n",
                                                       "Session start time: ", currSession.getSessionStartTime().ToString(), "\n",
                                                       "Reference date: ", currSession.getHHLL_ReferenceDateTime().ToString(), "\n",
@@ -169,7 +171,7 @@ namespace biiuse
                         status = "DR/ATR is too big. Trade is rejected";
                     }
 
-                    currSession.addLogEntry(true, "Tradeable Highest High found",
+                    currSession.addLogEntry(2, "Tradeable Highest High found",
                                                   "Highest high is: ", currSession.getHighestHigh().ToString("F5"), "\n",
                                                   "Time of highest high: ", currSession.getHighestHighTime().ToString(), "\n",
                                                   "Session high: ", iHigh(null, MqlApi.PERIOD_D1, 0).ToString("F5"), " Session low: ", iLow(null, MqlApi.PERIOD_D1, 0).ToString("F5"), "\n",
@@ -178,7 +180,7 @@ namespace biiuse
                                                   );
                     if (go)
                     {
-                        ATRTrade trade = new ATRTrade(strategyLabel, false, lotDigits, logFileName, currSession.getHighestHigh(), currSession.getATR(), lengthOfGracePeriod, maxRisk, maxVolatility, minProfitTarget, rangeBuffer, rangeRestriction, currSession.getTenDayHigh() - currSession.getTenDayLow(), currSession, maxBalanceRisk, entryLevel, this);
+                        ATRTrade trade = new ATRTrade(strategyLabel, false, lotDigits, logFileName, currSession.getHighestHigh(), currSession.getATR(), lengthOfGracePeriod, maxRisk, maxVolatility, minProfitTarget, rangeBuffer, rangeRestriction, currSession.getTenDayHigh() - currSession.getTenDayLow(), currSession, maxBalanceRisk, entryLevel, emailNotificationLevel, this);
                         trade.setState(new HighestHighReceivedEstablishingEligibilityRange(trade, this));
                         trades.Add(trade);
                     }
@@ -202,7 +204,7 @@ namespace biiuse
                         status = "DR/ATR is too big. Trade is rejected";
                     }
 
-                    currSession.addLogEntry(true, "Tradeable Lowest Low found",
+                    currSession.addLogEntry(2, "Tradeable Lowest Low found",
                                                   "Lowest low is: ", currSession.getLowestLow().ToString("F5"), "\n",
                                                   "Time of lowest low: ", currSession.getLowestLowTime().ToString(), "\n",
                                                   "Session high: ", iHigh(null, MqlApi.PERIOD_D1, 0).ToString("F5"), " Session low: ", iLow(null, MqlApi.PERIOD_D1, 0).ToString("F5"), "\n",
@@ -212,7 +214,7 @@ namespace biiuse
 
                     if (go)
                     {
-                        ATRTrade trade = new ATRTrade(strategyLabel, false, lotDigits, logFileName, currSession.getLowestLow(), currSession.getATR(), lengthOfGracePeriod, maxRisk, maxVolatility, minProfitTarget, rangeBuffer, rangeRestriction, currSession.getTenDayHigh() - currSession.getTenDayLow(), currSession, maxBalanceRisk, entryLevel, this);
+                        ATRTrade trade = new ATRTrade(strategyLabel, false, lotDigits, logFileName, currSession.getLowestLow(), currSession.getATR(), lengthOfGracePeriod, maxRisk, maxVolatility, minProfitTarget, rangeBuffer, rangeRestriction, currSession.getTenDayHigh() - currSession.getTenDayLow(), currSession, maxBalanceRisk, entryLevel, emailNotificationLevel, this);
                         trade.setState(new LowestLowReceivedEstablishingEligibilityRange(trade, this));
                         trades.Add(trade);
                     }

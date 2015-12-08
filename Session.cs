@@ -12,7 +12,7 @@ namespace biiuse
 
     internal class Session : MQL4Wrapper
     {
-        public Session(string _strategyLabel, int aSessionID, string aSessionName, DateTime aSessionStartDateTime, DateTime aSessionEndDateTime, DateTime aHHLL_ReferenceDateTime, bool tradingFlag, int aHHLLThreshold, ATR_Type atrType, MqlApi mql4) : base(mql4)
+        public Session(string _strategyLabel, int aSessionID, string aSessionName, DateTime aSessionStartDateTime, DateTime aSessionEndDateTime, DateTime aHHLL_ReferenceDateTime, bool tradingFlag, int aHHLLThreshold, ATR_Type atrType, int _emailNotificationLevel, MqlApi mql4) : base(mql4)
         {
             this.sessionID = aSessionID;
             this.sessionName = aSessionName;
@@ -25,6 +25,7 @@ namespace biiuse
             this.lowestLow = 9999999999;
             this.atrType = atrType;
             this.strategyLabel = _strategyLabel;
+            this.emailNotificationLevel = _emailNotificationLevel;
 
             initialize();
         }
@@ -46,7 +47,7 @@ namespace biiuse
 
                 if (indexOfReferenceStart == -1)
                 {
-                    this.addLogEntry(true, "ALERT: Could not find Shift of first 1H bar of reference period. Trading is disabled.");
+                    this.addLogEntry(3, "ALERT: Could not find Shift of first 1H bar of reference period. Trading is disabled.");
                     return;
                 }
 
@@ -201,7 +202,7 @@ namespace biiuse
         }
 
 
-        public void addLogEntry(bool sendByEmail = true, params Object[] arg)
+        public void addLogEntry(int notificationLevel, params Object[] arg)
         {
             if (arg.Length <= 0) return;
             string subject = strategyLabel + " " + mql4.Symbol() + "  " + mql4.TimeCurrent().ToString() + " " + arg[0];
@@ -223,7 +224,13 @@ namespace biiuse
             }
             body += line + "\r\n" + "\r\n";
             mql4.Print(line);
-            if ((sendByEmail) && (!mql4.IsTesting())) mql4.SendMail(subject, body);
+            if ((this.emailNotificationLevel >= notificationLevel) && (!mql4.IsTesting()))
+            {
+                //trim subject to max 127 characters - Meta Trade restriction for email subject length
+                subject = subject.Substring(0, Math.Min(subject.Length, 127)); 
+                mql4.SendMail(subject, body);
+            }
+            
         }
 
         public DateTime getSessionStartTime()
@@ -325,5 +332,6 @@ namespace biiuse
         private ATR_Type atrType;
         private double atr5D;
         private string strategyLabel;
+        private int emailNotificationLevel;
     }
 }
