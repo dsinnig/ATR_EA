@@ -4,3 +4,4 @@ ATR EA.csproj.user
 ATR EA.sln
 bin/
 obj/
+*.ex4
