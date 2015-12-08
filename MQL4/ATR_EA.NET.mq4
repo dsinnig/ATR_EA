@@ -37,6 +37,7 @@ enum ATR
  };
 
 
+input string strategyLabel = ""; //Label to be used in email and log entries
 input double maxBalanceRisk = 0.0075; //Max risk per trader relative to account balance (in %)
 input int sundayLengthInHours=7; //Length of Sunday session in hours
 input int HHLL_Threshold=60; //Time in minutes after last HH / LL before a tradeable HH/LL can occur
@@ -66,6 +67,7 @@ input string logFileName="tradeLog.csv"; //path and filename for CSV trade log
 int init()
 {
 	nquotes_setup("biiuse.ATR_EA", "ATR_EA");
+	nquotes_set_property_string("strategyLabel", strategyLabel);
 	nquotes_set_property_double("maxBalanceRisk",maxBalanceRisk); 
 	nquotes_set_property_int("sundayLengthInHours",sundayLengthInHours); 
    nquotes_set_property_int("HHLL_Threshold",HHLL_Threshold); 

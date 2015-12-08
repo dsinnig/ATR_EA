@@ -224,7 +224,13 @@ namespace biiuse
             }
             body += line + "\r\n" + "\r\n";
             mql4.Print(line);
-            if ((this.emailNotificationLevel >= notificationLevel) && (!mql4.IsTesting())) mql4.SendMail(subject, body);
+            if ((this.emailNotificationLevel >= notificationLevel) && (!mql4.IsTesting()))
+            {
+                //trim subject to max 127 characters - Meta Trade restriction for email subject length
+                subject = subject.Substring(0, Math.Min(subject.Length, 127)); 
+                mql4.SendMail(subject, body);
+            }
+            
         }
 
         public DateTime getSessionStartTime()

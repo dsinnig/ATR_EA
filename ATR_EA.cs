@@ -121,7 +121,7 @@ namespace biiuse
                             sessionStatus = "ATR and ATR/OR are within range. Trades may be triggered in this sessions";
                         }
 
-                        currSession.addLogEntry(1, "New Trading Session Established",
+                        currSession.addLogEntry(2, "New Trading Session Established",
                                                       "Session name: ", currSession.getName(), "\n",
                                                       "Session start time: ", currSession.getSessionStartTime().ToString(), "\n",
                                                       "Reference date: ", currSession.getHHLL_ReferenceDateTime().ToString(), "\n",
@@ -171,7 +171,7 @@ namespace biiuse
                         status = "DR/ATR is too big. Trade is rejected";
                     }
 
-                    currSession.addLogEntry(1, "Tradeable Highest High found",
+                    currSession.addLogEntry(2, "Tradeable Highest High found",
                                                   "Highest high is: ", currSession.getHighestHigh().ToString("F5"), "\n",
                                                   "Time of highest high: ", currSession.getHighestHighTime().ToString(), "\n",
                                                   "Session high: ", iHigh(null, MqlApi.PERIOD_D1, 0).ToString("F5"), " Session low: ", iLow(null, MqlApi.PERIOD_D1, 0).ToString("F5"), "\n",
@@ -204,7 +204,7 @@ namespace biiuse
                         status = "DR/ATR is too big. Trade is rejected";
                     }
 
-                    currSession.addLogEntry(1, "Tradeable Lowest Low found",
+                    currSession.addLogEntry(2, "Tradeable Lowest Low found",
                                                   "Lowest low is: ", currSession.getLowestLow().ToString("F5"), "\n",
                                                   "Time of lowest low: ", currSession.getLowestLowTime().ToString(), "\n",
                                                   "Session high: ", iHigh(null, MqlApi.PERIOD_D1, 0).ToString("F5"), " Session low: ", iLow(null, MqlApi.PERIOD_D1, 0).ToString("F5"), "\n",
