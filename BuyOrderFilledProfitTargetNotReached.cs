@@ -22,7 +22,7 @@ namespace biiuse
                 //context.addLogEntry("Stop loss triggered @" + mql4.DoubleToString(mql4.OrderClosePrice(), mql4.Digits) + " " + logMessage, true);
                 //context.addLogEntry("P/L of: $" + mql4.DoubleToString(mql4.OrderProfit(), 2) + "; Commission: $" + mql4.DoubleToString(mql4.OrderCommission(), 2) + "; Swap: $" + mql4.DoubleToString(mql4.OrderSwap(), 2) + "; New Account balance: $" + mql4.DoubleToString(mql4.AccountBalance(), 2), true);
 
-                context.addLogEntry(true, "Stop loss triggered @" + mql4.DoubleToString(mql4.OrderClosePrice(), mql4.Digits),
+                context.addLogEntry(1, "Stop loss triggered @" + mql4.DoubleToString(mql4.OrderClosePrice(), mql4.Digits),
                                           "Stop loss triggered @" + mql4.DoubleToString(mql4.OrderClosePrice(), mql4.Digits), "\n",
                                           logMessage, "\n",
                                           "P/L of: $" + mql4.DoubleToString(mql4.OrderProfit(), 2), "\n",
@@ -42,7 +42,7 @@ namespace biiuse
 
             if (mql4.Bid > context.getInitialProfitTarget())
             {
-                context.addLogEntry(true, "Initial profit target reached. Looking to adjust stop loss");
+                context.addLogEntry(2, "Initial profit target reached. Looking to adjust stop loss");
                 context.setState(new LongProfitTargetReachedLookingToAdjustStopLoss(context, mql4));
             }
         }

@@ -44,14 +44,14 @@ namespace biiuse
                     if (trade.getEntryLevel() == 0)
                     {
 
-                        trade.addLogEntry(true, "Break below range low - Placing Sell Limit Order");
+                        trade.addLogEntry(2, "Break below range low - Placing Sell Limit Order");
                         stopLoss = rangeHigh;
                         nextState = new SellLimitOrderOpened(trade, mql4);
                         orderResult = trade.Order.submitNewOrder(limitOrderType, entryPrice, stopLoss, 0, cancelPrice, positionSize);
                         orderPlaced = true;
                     } else
                     {
-                        trade.addLogEntry(true, "Break below range low - Waiting for retracement");
+                        trade.addLogEntry(2, "Break below range low - Waiting for retracement");
                         stopLoss = rangeHigh;
                         double retracementLevel = entryPrice;
                         nextState = new WaitForRetracement(trade, MqlApi.OP_SELLSTOP, retracementLevel, stopLoss, cancelPrice, positionSize, mql4);
@@ -61,7 +61,7 @@ namespace biiuse
                 }
                 if (mql4.Ask > rangeHigh)
                 {
-                    trade.addLogEntry(true, "Ask price above upper range - cancel trade");
+                    trade.addLogEntry(2, "Ask price above upper range - cancel trade");
                     trade.setState(new TradeClosed(trade, mql4));
                     return;
                 }
@@ -73,14 +73,14 @@ namespace biiuse
                 {
                     if (trade.getEntryLevel() == 0)
                     {
-                        trade.addLogEntry(true, "Break above range high - Placing Buy Limit Order");
+                        trade.addLogEntry(2, "Break above range high - Placing Buy Limit Order");
                         stopLoss = rangeLow;
                         nextState = new BuyLimitOrderOpened(trade, mql4);
                         orderResult = trade.Order.submitNewOrder(limitOrderType, entryPrice, stopLoss, 0, cancelPrice, positionSize);
                         orderPlaced = true;
                     } else
                     {
-                        trade.addLogEntry(true, "Break above range high - Waiting for retracement");
+                        trade.addLogEntry(2, "Break above range high - Waiting for retracement");
                         stopLoss = rangeLow;
                         double retracementLevel = entryPrice;
                         nextState = new WaitForRetracement(trade, MqlApi.OP_BUYSTOP, retracementLevel, stopLoss, cancelPrice, positionSize, mql4);
@@ -90,7 +90,7 @@ namespace biiuse
                 }
                 if (mql4.Bid < rangeLow)
                 {
-                    trade.addLogEntry(true, "Bid price below lower range - cancel trade");
+                    trade.addLogEntry(2, "Bid price below lower range - cancel trade");
                     trade.setState(new TradeClosed(trade, mql4));
                     return;
                 }
@@ -126,7 +126,7 @@ namespace biiuse
 
                     trade.addLogEntry("Limit order successfully placed. Initial Profit target is: " + mql4.DoubleToString(trade.getInitialProfitTarget(), mql4.Digits) + " (" + (mql4.IntegerToString((int)(mql4.MathAbs(trade.getInitialProfitTarget() - trade.getPlannedEntry()) * OrderManager.getPipConversionFactor(mql4)))) + ") pips", true);
 
-                    trade.addLogEntry(true, "Trade Details",
+                    trade.addLogEntry(1, "Trade Details",
                                                       "AccountBalance: $" + mql4.DoubleToString(mql4.AccountBalance(), 2), "\n",
                                                       "Risk Capital: $" + mql4.DoubleToString(riskCapital, 2), "\n",
                                                       "Risk pips: " + mql4.DoubleToString(riskPips, 2) + " micro pips", "\n",

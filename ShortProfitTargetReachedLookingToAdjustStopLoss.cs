@@ -36,7 +36,7 @@ namespace biiuse
                 //context.addLogEntry("Stop loss triggered @" + mql4.DoubleToString(context.Order.getOrderClosePrice(), mql4.Digits) + " " + logMessage, true);
                 //context.addLogEntry("P/L of: $" + mql4.DoubleToString(context.Order.getOrderProfit(), 2) + "; Commission: $" + mql4.DoubleToString(context.Order.getOrderCommission(), 2) + "; Swap: $" + mql4.DoubleToString(context.Order.getOrderSwap(), 2) + "; New Account balance: $" + mql4.DoubleToString(mql4.AccountBalance(), 2), true);
 
-                context.addLogEntry(true, "Stop loss triggered @" + mql4.DoubleToString(mql4.OrderClosePrice(), mql4.Digits),
+                context.addLogEntry(1, "Stop loss triggered @" + mql4.DoubleToString(mql4.OrderClosePrice(), mql4.Digits),
                           "Stop loss triggered @" + mql4.DoubleToString(mql4.OrderClosePrice(), mql4.Digits), "\n",
                           logMessage, "\n",
                           "P/L of: $" + mql4.DoubleToString(mql4.OrderProfit(), 2), "\n",
@@ -66,7 +66,7 @@ namespace biiuse
                 {
                     currentLL = mql4.Low[1];
                     barStartTimeOfCurrentLL = mql4.Time[1];
-                    context.addLogEntry(true, "Initial low established at: " + mql4.DoubleToString(currentLL, mql4.Digits));
+                    context.addLogEntry(3, "Initial low established at: " + mql4.DoubleToString(currentLL, mql4.Digits));
                 }
 
                 if (currentLL != 99999)
@@ -100,7 +100,7 @@ namespace biiuse
                         }
                         if (!upBarFound || (high == -1))
                         {
-                            context.addLogEntry(true, "Found new low, but it's a coninuation bar - Do not adjust stop loss");
+                            context.addLogEntry(3, "Found new low, but it's a coninuation bar - Do not adjust stop loss");
                             return;
                         }
 
@@ -114,7 +114,7 @@ namespace biiuse
                         {
                             //adjust stop loss
                             context.addLogEntry("Attempting to adjust stop loss to: " + mql4.DoubleToString(high + buffer, mql4.Digits), true);
-                            context.addLogEntry(true, "New low found. High point between lows is within profit target - adjust stop loss",
+                            context.addLogEntry(3, "New low found. High point between lows is within profit target - adjust stop loss",
                                                       "High point between lows is: " + mql4.DoubleToString(high, mql4.Digits), "\n",
                                                       "New stop loss (high+buffer): ", mql4.NormalizeDouble(high + buffer, mql4.Digits)
                                                );
@@ -147,7 +147,7 @@ namespace biiuse
                         if (high + buffer >= context.getInitialProfitTarget())
                         {
                             context.addLogEntry("High plus range buffer of " + mql4.IntegerToString(context.getRangeBufferInMicroPips()) + " micro pips is above initial profit target of: " + mql4.DoubleToString(context.getInitialProfitTarget(), mql4.Digits) + ". Do not adjust stop loss", true);
-                            context.addLogEntry(true, "New low found. But high point between lows is not within profit target - Do NOT adjust stop loss",
+                            context.addLogEntry(3, "New low found. But high point between lows is not within profit target - Do NOT adjust stop loss",
                                                       "High point between lows is: " + mql4.DoubleToString(high, mql4.Digits), "\n",
                                                       "Profit target is: ", mql4.DoubleToString(context.getInitialProfitTarget(), mql4.Digits)
                                                 );
@@ -159,7 +159,7 @@ namespace biiuse
                         if (high + buffer > context.getStopLoss())
                         {
                             context.addLogEntry("High plus range buffer of " + mql4.IntegerToString(context.getRangeBufferInMicroPips()) + " micro pips is above previous stop loss: " + mql4.DoubleToString(context.getStopLoss(), mql4.Digits) + ". Do not adjust stop loss", true);
-                            context.addLogEntry(true, "New low found. But high point between lows is not above previous stop loss - Do NOT adjust stop loss",
+                            context.addLogEntry(3, "New low found. But high point between lows is not above previous stop loss - Do NOT adjust stop loss",
                                                       "High point between lows is: " + mql4.DoubleToString(high, mql4.Digits), "\n",
                                                       "Previous stop loss is: ", mql4.DoubleToString(context.getStopLoss(), mql4.Digits)
                                                 );
