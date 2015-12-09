@@ -177,7 +177,7 @@ namespace biiuse
                         context.addLogEntry("AccountBalance: $" + mql4.DoubleToString(mql4.AccountBalance(), 2) + "; Risk Capital: $" + mql4.DoubleToString(riskCapital, 2) + "; Risk pips: " + mql4.DoubleToString(riskPips, 2) + " micro pips; Position Size: " + mql4.DoubleToString(positionSize, 2) + " lots; Pip value: " + mql4.DoubleToString(OrderManager.getPipValue(mql4), mql4.Digits), true);
 
                         //place Order
-                        ErrorType result = context.Order.submitNewOrder(orderType, entryPrice, stopLoss, 0, cancelPrice, positionSize);
+                        ErrorType result = context.Order.submitNewOrder(orderType, entryPrice, stopLoss, 0, cancelPrice, positionSize, 0);
 
                         context.setStartingBalance(mql4.AccountBalance());
                         context.setOrderPlacedDate(mql4.TimeCurrent());

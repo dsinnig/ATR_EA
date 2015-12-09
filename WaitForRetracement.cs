@@ -40,7 +40,7 @@ namespace biiuse
                     initialProfitTarget = retracementLevel - ((stopLoss - retracementLevel) * trade.getMinProfitTarget());
 
 
-                    orderResult = trade.Order.submitNewOrder(stopOrderType, entryPrice, stopLoss, 0, stopLoss, positionSize);
+                    orderResult = trade.Order.submitNewOrder(stopOrderType, entryPrice, stopLoss, 0, stopLoss, positionSize, 0);
                     orderPlaced = true;
                     trade.setCancelPrice(stopLoss);
                 }
@@ -61,7 +61,7 @@ namespace biiuse
                     nextState = new StopBuyOrderOpened(trade, mql4);
                     entryPrice = retracementLevel + ((retracementLevel - stopLoss) * trade.getEntryLevel());
                     initialProfitTarget = retracementLevel + ((retracementLevel - stopLoss)) * trade.getMinProfitTarget();
-                    orderResult = trade.Order.submitNewOrder(stopOrderType, entryPrice, stopLoss, 0, stopLoss, positionSize);
+                    orderResult = trade.Order.submitNewOrder(stopOrderType, entryPrice, stopLoss, 0, stopLoss, positionSize, 0);
                     orderPlaced = true;
                     trade.setCancelPrice(stopLoss);
                 }

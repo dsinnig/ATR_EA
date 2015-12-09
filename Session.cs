@@ -141,7 +141,7 @@ namespace biiuse
                 this.atr5D = (double) (_fiveDayHigh - _fiveDayLow);
 
                 this.prevDayHH = mql4.iHigh(mql4.Symbol(), MqlApi.PERIOD_D1, 1);
-                this.preDayLL = mql4.iLow(mql4.Symbol(), MqlApi.PERIOD_D1, 1);
+                this.prevDayLL = mql4.iLow(mql4.Symbol(), MqlApi.PERIOD_D1, 1);
 
                 //long term ATR (defailt = 20days
                 int duration = 20;

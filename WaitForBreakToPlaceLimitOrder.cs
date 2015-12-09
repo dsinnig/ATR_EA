@@ -47,7 +47,7 @@ namespace biiuse
                         trade.addLogEntry(2, "Break below range low - Placing Sell Limit Order");
                         stopLoss = rangeHigh;
                         nextState = new SellLimitOrderOpened(trade, mql4);
-                        orderResult = trade.Order.submitNewOrder(limitOrderType, entryPrice, stopLoss, 0, cancelPrice, positionSize);
+                        orderResult = trade.Order.submitNewOrder(limitOrderType, entryPrice, stopLoss, 0, cancelPrice, positionSize, 0);
                         orderPlaced = true;
                     } else
                     {
@@ -76,7 +76,7 @@ namespace biiuse
                         trade.addLogEntry(2, "Break above range high - Placing Buy Limit Order");
                         stopLoss = rangeLow;
                         nextState = new BuyLimitOrderOpened(trade, mql4);
-                        orderResult = trade.Order.submitNewOrder(limitOrderType, entryPrice, stopLoss, 0, cancelPrice, positionSize);
+                        orderResult = trade.Order.submitNewOrder(limitOrderType, entryPrice, stopLoss, 0, cancelPrice, positionSize, 0);
                         orderPlaced = true;
                     } else
                     {
