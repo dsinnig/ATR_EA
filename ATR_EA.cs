@@ -9,6 +9,8 @@ namespace biiuse
         [ExternVariable]
         public string strategyLabel = ""; //Label for the strategy - will be used in log and email. 
         [ExternVariable]
+        public int tradeTypeInInt = 0; //User intToTradeType to convert to Enum Trade_Type
+        [ExternVariable]
         public double maxBalanceRisk = 0.0075; //Max risk per trader relative to account balance (in %)
         [ExternVariable]
         public int sundayLengthInHours = 7; //Length of Sunday session in hours
@@ -55,9 +57,18 @@ namespace biiuse
         [ExternVariable]
         public string logFileName = "tradeLog.csv"; //path and filename for CSV trade log
 
+
+        enum Trade_Type
+        {
+            COUNTER_TREND,
+            TREND
+        }
+
         public override int init()
         {
             atrType = intToATR_Type(atrTypeInInt);
+            tradeType = intToTrade_Type(tradeTypeInInt);
+
             sundayLengthInSeconds = 60 * 60 * sundayLengthInHours;
             trades = new List<Trade>();
 
@@ -469,6 +480,16 @@ namespace biiuse
             return ATR_Type.DAY_TRADE_2_DAYS;
         }
 
+        private Trade_Type intToTrade_Type(int trendTypeInInt)
+        {
+            switch (tradeTypeInInt)
+            {
+                case 0: return Trade_Type.COUNTER_TREND;
+                case 1: return Trade_Type.TREND;
+            }
+            return Trade_Type.COUNTER_TREND;
+        }
+
 
         private Session currSession = null;
         private static DateTime bartime = new DateTime();
@@ -476,6 +497,7 @@ namespace biiuse
         const int maxNumberOfTrades = 10000;
         List<Trade> trades;
         private ATR_Type atrType;
+        private Trade_Type tradeType;
     }
 
 

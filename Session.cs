@@ -62,7 +62,6 @@ namespace biiuse
                 }
 
                 this.highestHigh = mql4.iHigh(mql4.Symbol(), MqlApi.PERIOD_H1, indexOfHighestHigh);
-
                 this.dateOfHighestHigh = mql4.iTime(mql4.Symbol(), MqlApi.PERIOD_H1, indexOfHighestHigh);
                 
                 this.lowestLow = mql4.iLow(mql4.Symbol(), MqlApi.PERIOD_H1, indexOfLowestLow);
@@ -140,6 +139,23 @@ namespace biiuse
                 }
 
                 this.atr5D = (double) (_fiveDayHigh - _fiveDayLow);
+
+                this.prevDayHH = mql4.iHigh(mql4.Symbol(), MqlApi.PERIOD_D1, 1);
+                this.preDayLL = mql4.iLow(mql4.Symbol(), MqlApi.PERIOD_D1, 1);
+
+                //long term ATR (defailt = 20days
+                int duration = 20;
+                double longTermLL = 9999;
+                double longTermHH = -1;
+                for (i=1; i<=duration; ++i) 
+                {
+                    double high = mql4.iHigh(mql4.Symbol(), MqlApi.PERIOD_D1, i);
+                    double low = mql4.iLow(mql4.Symbol(), MqlApi.PERIOD_D1, i);
+                    if (high > longTermHH) longTermHH = high;
+                    if (low < longTermLL) longTermLL = low;
+                }
+
+                this.longTermATR = longTermHH - longTermLL;
                 
             } //end if TradingAllowed
         }
@@ -281,8 +297,6 @@ namespace biiuse
                 case ATR_Type.DAY_TRADE_2_DAYS: return this.atr2D;
                 case ATR_Type.SWING_TRADE_5_DAYS: return this.atr5D;
             }
-
-
             return this.atr2D;
 
         }
@@ -312,7 +326,20 @@ namespace biiuse
             return this.tenDayLow;
         }
 
+        public double getLongTermATR()
+        {
+            return this.longTermATR;
+        }
 
+        public double getPrevDayHigh()
+        {
+            return this.prevDayHH;
+        }
+
+        public double getPrevDayLow()
+        {
+            return this.prevDayLL;
+        }
 
         private int sessionID;
         private string sessionName;
@@ -333,5 +360,8 @@ namespace biiuse
         private double atr5D;
         private string strategyLabel;
         private int emailNotificationLevel;
+        private double prevDayHH;
+        private double prevDayLL;
+        private double longTermATR; 
     }
 }

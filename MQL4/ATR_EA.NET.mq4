@@ -35,9 +35,16 @@ enum ATR
    DAY_TRADE_2_DAYS=1,  
    SWING_TRADE_5_DAYS=2, 
  };
+ 
+ enum TRADE_TYPE 
+ {
+   COUNTER_TREND=0,  
+   TREND=1,  
+ };
 
 
 input string strategyLabel = ""; //Label to be used in email and log entries
+input TRADE_TYPE tradeType = COUNTER_TREND; //Indicates the trade type to be executed
 input double maxBalanceRisk = 0.0075; //Max risk per trader relative to account balance (in %)
 input int sundayLengthInHours=7; //Length of Sunday session in hours
 input int HHLL_Threshold=60; //Time in minutes after last HH / LL before a tradeable HH/LL can occur
@@ -62,12 +69,11 @@ input bool cutLossesBeforeATRFilter=true; //Flag whether the losing streak filte
 input int emailNotificationLevel = 5; //The higher the level the more email are sent. If level = 0 - no email will be sent. 
 input string logFileName="tradeLog.csv"; //path and filename for CSV trade log
    
-
-
 int init()
 {
 	nquotes_setup("biiuse.ATR_EA", "ATR_EA");
-	nquotes_set_property_string("strategyLabel", strategyLabel);
+   nquotes_set_property_string("strategyLabel", strategyLabel);
+	nquotes_set_property_int("tradeTypeInInt", tradeType);
 	nquotes_set_property_double("maxBalanceRisk",maxBalanceRisk); 
 	nquotes_set_property_int("sundayLengthInHours",sundayLengthInHours); 
    nquotes_set_property_int("HHLL_Threshold",HHLL_Threshold); 
