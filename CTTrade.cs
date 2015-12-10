@@ -1,7 +1,7 @@
 ﻿using NQuotes;
 namespace biiuse
 {
-    internal class ATRTrade : Trade
+    internal class CTTrade : Trade
     {
         private double tenDayRange;
         private double rangeHigh;
@@ -13,7 +13,7 @@ namespace biiuse
         private double percentageOfATRForMaxRisk;
         private double percentageOfATRForMaxVolatility;
         private double minProfitTarget;
-        private int rangeBufferInMicroPips;
+        
         // to be added
         private double rangeRestriction;
         private double askPriceBeforeOrderEntry;
@@ -38,8 +38,8 @@ namespace biiuse
         private double maxBalanceRisk;
         private double entryLevel; 
 
-        public ATRTrade(string _strategyLabel, bool sim, int _lotDigits, string _logFileName, double _newHHLL, double _ATR, int _lengthIn1MBarsOfWaitingPeriod, double _percentageOfATRForMaxRisk, double _percentageOfATRForMaxVolatility,
-            double _minProfitTarget, int _rangeBufferInMicroPips, double _rangeRestriction, double _tenDayRange, Session referenceSession, double _maxBalanceRisk, double _entryLevel, int _emailNotificationLevel, MqlApi mql4) : base(_strategyLabel, sim, _lotDigits, _logFileName, _emailNotificationLevel, mql4)
+        public CTTrade(string _strategyLabel, bool sim, int _lotDigits, string _logFileName, double _newHHLL, double _ATR, int _lengthIn1MBarsOfWaitingPeriod, double _percentageOfATRForMaxRisk, double _percentageOfATRForMaxVolatility,
+            double _minProfitTarget, int _rangeBufferInMicroPips, double _rangeRestriction, double _tenDayRange, Session referenceSession, double _maxBalanceRisk, double _entryLevel, int _emailNotificationLevel, MqlApi mql4) : base(_strategyLabel, sim, _lotDigits, _logFileName, _rangeBufferInMicroPips, _emailNotificationLevel, mql4)
         {
             this.newHHLL = _newHHLL;
             this.atr = _ATR;
@@ -47,7 +47,6 @@ namespace biiuse
             this.percentageOfATRForMaxRisk = _percentageOfATRForMaxRisk;
             this.percentageOfATRForMaxVolatility = _percentageOfATRForMaxVolatility;
             this.minProfitTarget = _minProfitTarget;
-            this.rangeBufferInMicroPips = _rangeBufferInMicroPips;
             this.rangeRestriction = _rangeRestriction;
 
             this.rangeHigh = 0;
@@ -84,11 +83,6 @@ namespace biiuse
         public double getMinProfitTarget()
         {
             return minProfitTarget;
-        }
-
-        public int getRangeBufferInMicroPips()
-        {
-            return rangeBufferInMicroPips;
         }
 
         public double getRangeRestriction()

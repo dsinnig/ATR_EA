@@ -6,8 +6,8 @@ namespace biiuse
 {
     internal class SellOrderFilledProfitTargetNotReached : TradeState
     {
-        private ATRTrade context; //hides conext in Trade
-        public SellOrderFilledProfitTargetNotReached(ATRTrade aContext, MqlApi mql4) : base(mql4) {
+        private Trade context; //hides conext in Trade
+        public SellOrderFilledProfitTargetNotReached(Trade aContext, MqlApi mql4) : base(mql4) {
             this.context = aContext;
             context.setOrderFilledDate(mql4.TimeCurrent());
             context.Order.OrderType = OrderType.SELL;

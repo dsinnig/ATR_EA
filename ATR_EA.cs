@@ -55,6 +55,10 @@ namespace biiuse
         [ExternVariable]
         public int emailNotificationLevel = 5; //the higher the more email messages will be sent out
         [ExternVariable]
+        public double maxATROR_TREND = 0.35; //max percentage of the ATR compared to overall range (OR)
+        [ExternVariable]
+        public double durationOfOverallRange = 20; //duration of the overall range in 
+        [ExternVariable]
         public string logFileName = "tradeLog.csv"; //path and filename for CSV trade log
 
 
@@ -86,9 +90,7 @@ namespace biiuse
         {
 
             //new bar?
-
-            //the second condition is to skip the first couple of minutes of when the market opens on Sunday
-            if (!bartime.Equals(Time[0]) && Time[0]-Time[2] < TimeSpan.FromHours(1))
+            if (!bartime.Equals(Time[0]))
             {
                 //TODO verify that identity makes it still work
                 bartime = Time[0];
@@ -111,39 +113,77 @@ namespace biiuse
                                " LL: ", currSession.getLowestLow(), "@ ", currSession.getLowestLowTime());
 
                         */
-                        double atr = currSession.getATR();
-                        double tenDayHigh = currSession.getTenDayHigh();
-                        double tenDayLow = currSession.getTenDayLow();
-                        double ATR_OR = atr / (tenDayHigh - tenDayLow);
-                        string sessionStatus = "";
 
-                        if ((currSession.getATR() * OrderManager.getPipConversionFactor(this) < minATR) || (currSession.getATR() * OrderManager.getPipConversionFactor(this) > maxATR))
+                        if (this.tradeType == Trade_Type.COUNTER_TREND)
                         {
-                            sessionStatus = ("ATR is not in range of: " + minATR + " - " + maxATR + ". No trades will be taken in this Session)");
-                            currSession.tradingAllowed(false);
+
+                            double atr = currSession.getATR();
+                            double tenDayHigh = currSession.getTenDayHigh();
+                            double tenDayLow = currSession.getTenDayLow();
+                            double ATR_OR = atr / (tenDayHigh - tenDayLow);
+                            string sessionStatus = "";
+
+                            if ((currSession.getATR() * OrderManager.getPipConversionFactor(this) < minATR) || (currSession.getATR() * OrderManager.getPipConversionFactor(this) > maxATR))
+                            {
+                                sessionStatus = ("ATR is not in range of: " + minATR + " - " + maxATR + ". No trades will be taken in this Session)");
+                                currSession.tradingAllowed(false);
+                            }
+                            else if ((ATR_OR > maxATROR) || (ATR_OR < minATROR))
+                            {
+                                sessionStatus = ("ATR/OR is not in range of: " + minATROR.ToString("F2") + " - " + maxATROR.ToString("F2") + ". No trades will be taken in this Session)");
+                                currSession.tradingAllowed(false);
+                            }
+                            else
+                            {
+                                sessionStatus = "ATR and ATR/OR are within range. Trades may be triggered in this session";
+                            }
+
+                            currSession.addLogEntry(2, "New Trading Session Established",
+                                                          "Session name: ", currSession.getName(), "\n",
+                                                          "Session start time: ", currSession.getSessionStartTime().ToString(), "\n",
+                                                          "Reference date: ", currSession.getHHLL_ReferenceDateTime().ToString(), "\n",
+                                                          "ATR: ", NormalizeDouble(atr, Digits), " (", (int)(currSession.getATR() * OrderManager.getPipConversionFactor(this)), " micro pips)", "\n",
+                                                          "HH: ", currSession.getHighestHigh().ToString("F5"), "(", currSession.getHighestHighTime(), ") ", "LL: ", currSession.getLowestLow().ToString("F5"), "(", currSession.getLowestLowTime(), ") ", "\n",
+                                                          "10 Day High is: ", tenDayHigh.ToString("F5"), " 10 Day Low is: ", tenDayLow.ToString("F5"), "\n",
+                                                          "ATR / OR is: ", ATR_OR.ToString("F5"), "\n",
+                                                          sessionStatus
+                                  );
                         }
-                        else if ((ATR_OR > maxATROR) || (ATR_OR < minATROR))
+
+                        if (this.tradeType == Trade_Type.TREND)
                         {
-                            sessionStatus = ("ATR/OR is not in range of: " + minATROR.ToString("F2") + " - " + maxATROR.ToString("F2") + ". No trades will be taken in this Session)");
-                            currSession.tradingAllowed(false);
+                            double overallRange = currSession.getLongTermATR();
+                            double atr = currSession.getATR();
+                            double prevDayHH = currSession.getPrevDayHigh();
+                            double prevDayLL = currSession.getPrevDayLow();
+                            double prevDayRange = prevDayHH - prevDayLL;
+                            string sessionStatus = "";
+
+                            if (prevDayRange >= atr)
+                            {
+                                sessionStatus = ("Yesterday's sessions's range (" + prevDayRange.ToString("F5") +  ") is greated than ATR (" + atr.ToString("F5") + "). No trades will be taken in this Session)");
+                                currSession.tradingAllowed(false);
+                            }
+
+                            else if (atr > overallRange * this.maxATROR_TREND)
+                            {
+                                sessionStatus = ("ATR (" + atr.ToString("F5") + ") is greater than " + maxATROR_TREND * 100 + "% of the overall range (" + overallRange.ToString("F5") + "). No trades will be taken in this Session)");
+                                currSession.tradingAllowed(false);
+                            } else
+                            {
+                                sessionStatus = "Yesterday's sessions's range and ATR are within limits. Trades may be triggered in this session";
+                            }
+
+                            currSession.addLogEntry(2, "New Trading Session Established",
+                                                          "Session name: ", currSession.getName(), "\n",
+                                                          "Session start time: ", currSession.getSessionStartTime().ToString(), "\n",
+                                                          "Reference date: ", currSession.getHHLL_ReferenceDateTime().ToString(), "\n",
+                                                          "ATR: ", NormalizeDouble(atr, Digits), " (", (int)(currSession.getATR() * OrderManager.getPipConversionFactor(this)), " micro pips)", "\n",
+                                                          "Yesterdays' HH: ", currSession.getPrevDayHigh().ToString("F5"), "LL: ", currSession.getLowestLow().ToString("F5"), "\n",
+                                                          "Overall range is: ", overallRange.ToString("F5"), "\n",
+                                                          sessionStatus
+                                  );
                         }
-                        else
-                        {
-                            sessionStatus = "ATR and ATR/OR are within range. Trades may be triggered in this sessions";
-                        }
-
-                        currSession.addLogEntry(2, "New Trading Session Established",
-                                                      "Session name: ", currSession.getName(), "\n",
-                                                      "Session start time: ", currSession.getSessionStartTime().ToString(), "\n",
-                                                      "Reference date: ", currSession.getHHLL_ReferenceDateTime().ToString(), "\n",
-                                                      "ATR: ", NormalizeDouble(atr, Digits), " (", (int)(currSession.getATR() * OrderManager.getPipConversionFactor(this)), " micro pips)", "\n",
-                                                      "HH: ", currSession.getHighestHigh().ToString("F5"), "(", currSession.getHighestHighTime(), ") ", "LL: ", currSession.getLowestLow().ToString("F5"), "(", currSession.getLowestLowTime(), ") ", "\n",
-                                                      "10 Day High is: ", tenDayHigh.ToString("F5"), " 10 Day Low is: ", tenDayLow.ToString("F5"), "\n",
-                                                      "ATR / OR is: ", ATR_OR.ToString("F5"), "\n",
-                                                      sessionStatus
-                              );
-
-
                     }
                 }
             }
@@ -155,82 +195,137 @@ namespace biiuse
 
 
 
-            if (currSession.tradingAllowed())
+            if (this.tradeType == Trade_Type.COUNTER_TREND)
             {
-                int updateResult = currSession.update((Bid + Ask) / 2);
-                double atr = currSession.getATR();
-                double curDailyRange = iHigh(null, MqlApi.PERIOD_D1, 0) - iLow(null, MqlApi.PERIOD_D1, 0);
-                double DR_ATR = curDailyRange / atr;
 
-                //if ((((ATR_OR < maxATROR) && (ATR_OR > minATROR)) || cutLossesBeforeATRFilter))
-
-
-                if ((updateResult == 1) && (minATR < currSession.getATR() * OrderManager.getPipConversionFactor(this)) && (maxATR > currSession.getATR() * OrderManager.getPipConversionFactor(this)))
+                if (currSession.tradingAllowed())
                 {
+                    int updateResult = currSession.update((Bid + Ask) / 2);
+                    double atr = currSession.getATR();
+                    double curDailyRange = iHigh(null, MqlApi.PERIOD_D1, 0) - iLow(null, MqlApi.PERIOD_D1, 0);
+                    double DR_ATR = curDailyRange / atr;
 
-                    string status = "";
+                    //if ((((ATR_OR < maxATROR) && (ATR_OR > minATROR)) || cutLossesBeforeATRFilter))
 
-                    bool go = false;
-                    if ((DR_ATR < maxDRATR) && (DR_ATR > minDRATR))
+
+                    if ((updateResult == 1) && (minATR < currSession.getATR() * OrderManager.getPipConversionFactor(this)) && (maxATR > currSession.getATR() * OrderManager.getPipConversionFactor(this)))
                     {
-                        go = true;
-                        status = "DR/ATR is within range. Starting 10bar clock";
-                    }
-                    else
-                    {
-                        go = false;
-                        status = "DR/ATR is too big. Trade is rejected";
-                    }
 
-                    currSession.addLogEntry(2, "Tradeable Highest High found",
-                                                  "Highest high is: ", currSession.getHighestHigh().ToString("F5"), "\n",
-                                                  "Time of highest high: ", currSession.getHighestHighTime().ToString(), "\n",
-                                                  "Session high: ", iHigh(null, MqlApi.PERIOD_D1, 0).ToString("F5"), " Session low: ", iLow(null, MqlApi.PERIOD_D1, 0).ToString("F5"), "\n",
-                                                  "DR / ATR is: ", DR_ATR.ToString("F5"), "\n",
-                                                  status
-                                                  );
-                    if (go)
-                    {
-                        ATRTrade trade = new ATRTrade(strategyLabel, false, lotDigits, logFileName, currSession.getHighestHigh(), currSession.getATR(), lengthOfGracePeriod, maxRisk, maxVolatility, minProfitTarget, rangeBuffer, rangeRestriction, currSession.getTenDayHigh() - currSession.getTenDayLow(), currSession, maxBalanceRisk, entryLevel, emailNotificationLevel, this);
-                        trade.setState(new HighestHighReceivedEstablishingEligibilityRange(trade, this));
-                        trades.Add(trade);
-                    }
+                        string status = "";
 
-                }
+                        bool go = false;
+                        if ((DR_ATR < maxDRATR) && (DR_ATR > minDRATR))
+                        {
+                            go = true;
+                            status = "DR/ATR is within range. Starting 10bar clock";
+                        }
+                        else
+                        {
+                            go = false;
+                            status = "DR/ATR is too big. Trade is rejected";
+                        }
 
-                if ((updateResult == -1) && (minATR < currSession.getATR() * OrderManager.getPipConversionFactor(this)) && (maxATR > currSession.getATR() * OrderManager.getPipConversionFactor(this)))
-                {
+                        currSession.addLogEntry(2, "Tradeable Highest High found",
+                                                      "Highest high is: ", currSession.getHighestHigh().ToString("F5"), "\n",
+                                                      "Time of highest high: ", currSession.getHighestHighTime().ToString(), "\n",
+                                                      "Session high: ", iHigh(null, MqlApi.PERIOD_D1, 0).ToString("F5"), " Session low: ", iLow(null, MqlApi.PERIOD_D1, 0).ToString("F5"), "\n",
+                                                      "DR / ATR is: ", DR_ATR.ToString("F5"), "\n",
+                                                      status
+                                                      );
+                        if (go)
+                        {
+                            CTTrade trade = new CTTrade(strategyLabel, false, lotDigits, logFileName, currSession.getHighestHigh(), currSession.getATR(), lengthOfGracePeriod, maxRisk, maxVolatility, minProfitTarget, rangeBuffer, rangeRestriction, currSession.getTenDayHigh() - currSession.getTenDayLow(), currSession, maxBalanceRisk, entryLevel, emailNotificationLevel, this);
+                            trade.setState(new HighestHighReceivedEstablishingEligibilityRange(trade, this));
+                            trades.Add(trade);
+                        }
 
-                    string status = "";
-
-                    bool go = false;
-                    if ((DR_ATR < maxDRATR) && (DR_ATR > minDRATR))
-                    {
-                        go = true;
-                        status = "DR/ATR is within range. Starting 10bar clock";
-                    }
-                    else
-                    {
-                        go = false;
-                        status = "DR/ATR is too big. Trade is rejected";
                     }
 
-                    currSession.addLogEntry(2, "Tradeable Lowest Low found",
-                                                  "Lowest low is: ", currSession.getLowestLow().ToString("F5"), "\n",
-                                                  "Time of lowest low: ", currSession.getLowestLowTime().ToString(), "\n",
-                                                  "Session high: ", iHigh(null, MqlApi.PERIOD_D1, 0).ToString("F5"), " Session low: ", iLow(null, MqlApi.PERIOD_D1, 0).ToString("F5"), "\n",
-                                                  "DR / ATR is: ", DR_ATR.ToString("F5"), "\n",
-                                                  status
-                                                  );
-
-                    if (go)
+                    if ((updateResult == -1) && (minATR < currSession.getATR() * OrderManager.getPipConversionFactor(this)) && (maxATR > currSession.getATR() * OrderManager.getPipConversionFactor(this)))
                     {
-                        ATRTrade trade = new ATRTrade(strategyLabel, false, lotDigits, logFileName, currSession.getLowestLow(), currSession.getATR(), lengthOfGracePeriod, maxRisk, maxVolatility, minProfitTarget, rangeBuffer, rangeRestriction, currSession.getTenDayHigh() - currSession.getTenDayLow(), currSession, maxBalanceRisk, entryLevel, emailNotificationLevel, this);
-                        trade.setState(new LowestLowReceivedEstablishingEligibilityRange(trade, this));
-                        trades.Add(trade);
+
+                        string status = "";
+
+                        bool go = false;
+                        if ((DR_ATR < maxDRATR) && (DR_ATR > minDRATR))
+                        {
+                            go = true;
+                            status = "DR/ATR is within range. Starting 10bar clock";
+                        }
+                        else
+                        {
+                            go = false;
+                            status = "DR/ATR is too big. Trade is rejected";
+                        }
+
+                        currSession.addLogEntry(2, "Tradeable Lowest Low found",
+                                                      "Lowest low is: ", currSession.getLowestLow().ToString("F5"), "\n",
+                                                      "Time of lowest low: ", currSession.getLowestLowTime().ToString(), "\n",
+                                                      "Session high: ", iHigh(null, MqlApi.PERIOD_D1, 0).ToString("F5"), " Session low: ", iLow(null, MqlApi.PERIOD_D1, 0).ToString("F5"), "\n",
+                                                      "DR / ATR is: ", DR_ATR.ToString("F5"), "\n",
+                                                      status
+                                                      );
+
+                        if (go)
+                        {
+                            CTTrade trade = new CTTrade(strategyLabel, false, lotDigits, logFileName, currSession.getLowestLow(), currSession.getATR(), lengthOfGracePeriod, maxRisk, maxVolatility, minProfitTarget, rangeBuffer, rangeRestriction, currSession.getTenDayHigh() - currSession.getTenDayLow(), currSession, maxBalanceRisk, entryLevel, emailNotificationLevel, this);
+                            trade.setState(new LowestLowReceivedEstablishingEligibilityRange(trade, this));
+                            trades.Add(trade);
+                        }
                     }
                 }
             }
+
+
+            if (this.tradeType == Trade_Type.COUNTER_TREND)
+            {
+                if (currSession.tradingAllowed())
+                {
+                    //check for break above range high AND above previous daily high
+                    double currentPrice = Bid + Ask / 2;
+                    double sessionHigh = iHigh(Symbol(), MqlApi.PERIOD_D1, 0);
+                    double sessionLow = iLow(Symbol(), MqlApi.PERIOD_D1, 0);
+                    
+                    if ((currentPrice > currSession.getPrevDayHigh()) && (currentPrice > sessionHigh)) {
+                        //Look to go LONG
+                        if (OrderManager.existsActiveLongOrderWithMagicNumber(magicNumber, this)) {
+                            currSession.addLogEntry(2, "New Long break-out found - but already LONG (NO TRADE)",
+                                                      "New high: ", currentPrice.ToString("F5"), "\n",
+                                                      "Long order already exists - No trade is inititad"
+                                                      );
+                        } else
+                        {
+                            currSession.addLogEntry(2, "New Long break-out found - start clock",
+                                                      "New high: ", currentPrice.ToString("F5"), "\n",
+                                                      "Now long order exists - start 10min clock"
+                                                      );
+
+                            CTTrade trade = new CTTrade(strategyLabel, false, lotDigits, logFileName, currSession.getLowestLow(), currSession.getATR(), lengthOfGracePeriod, maxRisk, maxVolatility, minProfitTarget, rangeBuffer, rangeRestriction, currSession.getTenDayHigh() - currSession.getTenDayLow(), currSession, maxBalanceRisk, entryLevel, emailNotificationLevel, this);
+                            
+                        }
+
+
+
+
+
+
+
+                    }
+
+
+
+
+
+
+                }
+                   
+
+
+
+
+
+            }
+
 
             return base.start();
         }
@@ -498,6 +593,7 @@ namespace biiuse
         List<Trade> trades;
         private ATR_Type atrType;
         private Trade_Type tradeType;
+        private int magicNumber = 1234; //only used for TREND trades
     }
 
 

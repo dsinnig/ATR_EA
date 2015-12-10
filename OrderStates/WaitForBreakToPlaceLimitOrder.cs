@@ -9,7 +9,7 @@ namespace biiuse
 {
     class WaitForBreakToPlaceLimitOrder : TradeState
     {
-        private ATRTrade trade;
+        private CTTrade trade;
         private int limitOrderType;
         private double rangeLow;
         private double rangeHigh;
@@ -17,7 +17,7 @@ namespace biiuse
         private double cancelPrice;
         private double positionSize;
 
-        public WaitForBreakToPlaceLimitOrder(ATRTrade _trade, int _limitOrderType, double _rangeLow, double _rangeHigh, double _entryPrice, double _cancelPrice, double _positionSize, MqlApi mql4) : base(mql4)
+        public WaitForBreakToPlaceLimitOrder(CTTrade _trade, int _limitOrderType, double _rangeLow, double _rangeHigh, double _entryPrice, double _cancelPrice, double _positionSize, MqlApi mql4) : base(mql4)
         {
             trade = _trade;
             limitOrderType = _limitOrderType;

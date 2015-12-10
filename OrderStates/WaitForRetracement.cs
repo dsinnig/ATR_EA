@@ -5,14 +5,14 @@ namespace biiuse
 {
     internal class WaitForRetracement : TradeState
     {
-        private ATRTrade trade;
+        private CTTrade trade;
         private int stopOrderType;
         private double retracementLevel;
         private double stopLoss;
         private double cancelPrice;
         private double positionSize;
         
-        public WaitForRetracement(ATRTrade _trade, int _stopOrderType, double _retracementLevel, double _stopLoss, double _cancelPrice, double _positionSize, MqlApi mql4) : base(mql4)
+        public WaitForRetracement(CTTrade _trade, int _stopOrderType, double _retracementLevel, double _stopLoss, double _cancelPrice, double _positionSize, MqlApi mql4) : base(mql4)
         {
             this.trade = _trade;
             this.stopOrderType = _stopOrderType;
