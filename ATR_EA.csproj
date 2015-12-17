@@ -49,10 +49,13 @@
     <Compile Include="CTTrade.cs" />
     <Compile Include="Session.cs" />
     <Compile Include="SessionFactory.cs" />
+    <Compile Include="TradeStates\BreakOutOccuredEstablishingEligibilityRange.cs" />
     <Compile Include="TradeStates\BuyOrderFilledProfitTargetNotReached.cs" />
+    <Compile Include="TradeStates\BuyOrderFilledTrendTrade.cs" />
     <Compile Include="TradeStates\HighestHighReceivedEstablishingEligibilityRange.cs" />
     <Compile Include="TradeStates\LowestLowReceivedEstablishingEligibilityRange.cs" />
     <Compile Include="TradeStates\SellOrderFilledProfitTargetNotReached.cs" />
+    <Compile Include="TradeStates\SellOrderFilledTrendTrade.cs" />
     <Compile Include="TradeStates\WaitForBreakToPlaceLimitOrder.cs" />
     <Compile Include="TradeStates\WaitForRetracement.cs" />
   </ItemGroup>
@@ -69,4 +72,8 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
- </Project>
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(TargetPath)" "C:\Program Files (x86)\FXCM MetaTrader 4\MQL4\Experts" /y
+xcopy "$(ProjectDir)\MQL4\*.ex4" "C:\Program Files (x86)\FXCM MetaTrader 4\MQL4\Experts" /y</PostBuildEvent>
+  </PropertyGroup>
+</Project>

@@ -61,6 +61,9 @@ namespace biiuse
                 rangeLow -= this.buffer;
                 rangeHigh += this.buffer;
 
+
+
+
                 context.setRSI(mql4.iCustom(null, 0, "RSI", 15, 0, 0));
                 context.setRSI5M(mql4.iCustom(null, MqlApi.PERIOD_M5, "RSI", 15, 0, 0));
                 context.setRSI15M(mql4.iCustom(null, MqlApi.PERIOD_M15, "RSI", 15, 0, 0));

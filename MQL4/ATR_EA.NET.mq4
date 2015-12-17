@@ -67,6 +67,9 @@ input int maxATR = 999999; //max ATR in micropips
 input double entryLevel = 0; //Level when the trade should be entered in Rs
 input bool cutLossesBeforeATRFilter=true; //Flag whether the losing streak filter should take into account trades with invalid ATR OT 
 input int emailNotificationLevel = 5; //The higher the level the more email are sent. If level = 0 - no email will be sent. 
+input double maxATROR_TREND = 0.35; ////max percentage of the ATR compared to overall range (OR)
+input double durationOfOverallRange = 20; //duration of the overall range in days
+input int lookbackDaysForStopLossAdjustment = 1; //number of days to look back for adjusting stop loss
 input string logFileName="tradeLog.csv"; //path and filename for CSV trade log
    
 int init()
@@ -96,6 +99,9 @@ int init()
    nquotes_set_property_double("entryLevel",entryLevel);  
    nquotes_set_property_bool("cutLossesBeforeATRFilter", cutLossesBeforeATRFilter);
    nquotes_set_property_int("emailNotificationLevel", emailNotificationLevel);
+   nquotes_set_property_double("maxATROR_TREND",maxATROR_TREND); 
+   nquotes_set_property_double("durationOfOverallRange",durationOfOverallRange); 
+   nquotes_set_property_int("lookbackDaysForStopLossAdjustment",lookbackDaysForStopLossAdjustment);
    nquotes_set_property_string("logFileName",logFileName); 
 	return (nquotes_init());
 }

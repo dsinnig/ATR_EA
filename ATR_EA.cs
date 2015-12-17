@@ -59,9 +59,10 @@ namespace biiuse
         [ExternVariable]
         public double durationOfOverallRange = 20; //duration of the overall range in 
         [ExternVariable]
+        public int lookbackDaysForStopLossAdjustment = 1; //number of days to look back for adjusting stop loss
+        [ExternVariable]
         public string logFileName = "tradeLog.csv"; //path and filename for CSV trade log
-
-
+        
         enum Trade_Type
         {
             COUNTER_TREND,
@@ -89,6 +90,7 @@ namespace biiuse
         public override int start()
         {
 
+            double trend = trend = iCustom(Symbol(), MqlApi.PERIOD_D1, "FXEdgeTrend_noDraw", 0, 0, 0);
             //new bar?
             if (!bartime.Equals(Time[0]))
             {
@@ -99,6 +101,7 @@ namespace biiuse
                 if (currSession != newSession)
                 {
                     currSession = newSession;
+
 
                     currSession.writeToCSV("session_atr.csv");
                     if (!currSession.tradingAllowed())
@@ -183,6 +186,10 @@ namespace biiuse
                                                           "Overall range is: ", overallRange.ToString("F5"), "\n",
                                                           sessionStatus
                                   );
+                            
+                            if (trend == -1.0) Print("TREND IS DOWN");
+                            if (trend == 0) Print("TREND IS SIDE");
+                            if (trend == 1.0) Print("TREND IS UP");
                         }
                     }
                 }
@@ -277,18 +284,22 @@ namespace biiuse
             }
 
 
-            if (this.tradeType == Trade_Type.COUNTER_TREND)
+            if (this.tradeType == Trade_Type.TREND)
             {
                 if (currSession.tradingAllowed())
                 {
                     //check for break above range high AND above previous daily high
-                    double currentPrice = Bid + Ask / 2;
+                    double currentPrice = (Bid + Ask) / 2;
                     double sessionHigh = iHigh(Symbol(), MqlApi.PERIOD_D1, 0);
                     double sessionLow = iLow(Symbol(), MqlApi.PERIOD_D1, 0);
                     
-                    if ((currentPrice > currSession.getPrevDayHigh()) && (currentPrice > sessionHigh)) {
+                    if ((currentPrice > currSession.getPrevDayHigh()) && (Ask >= sessionHigh) && !sameDirectionTradeAlreadyOpen(TradeType.LONG) && (trend == 1.0)) {
+
+
+
+
                         //Look to go LONG
-                        if (OrderManager.existsActiveLongOrderWithMagicNumber(magicNumber, this)) {
+                        if (OrderManager.existsActiveLongOrderWithMagicNumber(magicNumberTrendLong, this)) {
                             currSession.addLogEntry(2, "New Long break-out found - but already LONG (NO TRADE)",
                                                       "New high: ", currentPrice.ToString("F5"), "\n",
                                                       "Long order already exists - No trade is inititad"
@@ -297,37 +308,58 @@ namespace biiuse
                         {
                             currSession.addLogEntry(2, "New Long break-out found - start clock",
                                                       "New high: ", currentPrice.ToString("F5"), "\n",
-                                                      "Now long order exists - start 10min clock"
+                                                      "Start 10min clock"
                                                       );
 
-                            CTTrade trade = new CTTrade(strategyLabel, false, lotDigits, logFileName, currSession.getLowestLow(), currSession.getATR(), lengthOfGracePeriod, maxRisk, maxVolatility, minProfitTarget, rangeBuffer, rangeRestriction, currSession.getTenDayHigh() - currSession.getTenDayLow(), currSession, maxBalanceRisk, entryLevel, emailNotificationLevel, this);
-                            
+                            BOTrade trade = new BOTrade(strategyLabel, magicNumberTrendLong, TradeType.LONG, lotDigits, lengthOfGracePeriod, maxBalanceRisk, logFileName, rangeBuffer, lookbackDaysForStopLossAdjustment, currSession.getATR(), emailNotificationLevel, this);
+                            trade.setState(new BreakOutOccuredEstablishingEligibilityRange(trade, currentPrice, Math.Min(currSession.getPrevDayLow(), sessionLow), this));
+                            trades.Add(trade);
                         }
+                        
+                    }
 
+                    if ((currentPrice < currSession.getPrevDayLow()) && (Bid <= sessionLow) && !sameDirectionTradeAlreadyOpen(TradeType.SHORT) && (trend == -1.0))
+                    {
+                        //Look to go SHORT
+                        if (OrderManager.existsActiveLongOrderWithMagicNumber(magicNumberTrendShort, this))
+                        {
+                            currSession.addLogEntry(2, "New Short break-out found - but already SHORT (NO TRADE)",
+                                                      "New low: ", currentPrice.ToString("F5"), "\n",
+                                                      "Short order already exists - No trade is inititad"
+                                                      );
+                        }
+                        else
+                        {
+                            currSession.addLogEntry(2, "New Short break-out found - start clock",
+                                                      "New low: ", currentPrice.ToString("F5"), "\n",
+                                                      "Start 10min clock"
+                                                      );
 
-
-
-
-
+                            BOTrade trade = new BOTrade(strategyLabel, magicNumberTrendShort, TradeType.SHORT, lotDigits, lengthOfGracePeriod, maxBalanceRisk, logFileName, rangeBuffer, lookbackDaysForStopLossAdjustment, currSession.getATR(), emailNotificationLevel, this);
+                            trade.setState(new BreakOutOccuredEstablishingEligibilityRange(trade, Math.Max(currSession.getPrevDayHigh(), sessionHigh), currentPrice, this));
+                            trades.Add(trade);
+                        }
 
                     }
 
 
 
-
-
-
                 }
                    
-
-
-
-
-
             }
 
 
             return base.start();
+        }
+
+        private bool sameDirectionTradeAlreadyOpen(TradeType type)
+        {
+            foreach (var trade in trades)
+            {
+                if ((trade != null) /* && (trade.getTradeType() == type) */ && (!trade.isInFinalState())) return true;
+            }
+            return false;
+
         }
 
 
@@ -593,7 +625,8 @@ namespace biiuse
         List<Trade> trades;
         private ATR_Type atrType;
         private Trade_Type tradeType;
-        private int magicNumber = 1234; //only used for TREND trades
+        private int magicNumberTrendLong = 1234; //only used for LONG TREND trades
+        private int magicNumberTrendShort = 9876; //only used for SHORT TREND trades
     }
 
 
