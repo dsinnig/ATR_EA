@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{79F9219A-E959-4F74-B511-ECA6CE4DA75A}</ProjectGuid>
+    <ProjectGuid>{A5087907-0701-4689-83B2-3E91616B4C23}</ProjectGuid>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
     <AssemblyName>ATR_EA</AssemblyName>
@@ -63,7 +63,6 @@
     <None Include="MQL4\ATR_EA.NET.ex4" />
     <None Include="MQL4\ATR_EA.NET.mq4" />
   </ItemGroup>
-  <Import Project="..\EA_Common\Common.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />
@@ -73,7 +72,7 @@
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetPath)" "C:\Program Files (x86)\FXCM MetaTrader 4\MQL4\Experts" /y
-xcopy "$(ProjectDir)\MQL4\*.ex4" "C:\Program Files (x86)\FXCM MetaTrader 4\MQL4\Experts" /y</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(TargetPath)" "C:\Users\USER\AppData\Roaming\MetaQuotes\Terminal\BB190E062770E27C3E79391AB0D1A117\MQL4\Experts" /y
+xcopy "$(ProjectDir)\MQL4\*.ex4" "C:\Users\USER\AppData\Roaming\MetaQuotes\Terminal\BB190E062770E27C3E79391AB0D1A117\MQL4\Experts" /y</PostBuildEvent>
   </PropertyGroup>
 </Project>

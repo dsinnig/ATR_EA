@@ -90,7 +90,7 @@ namespace biiuse
         public override int start()
         {
 
-            double trend = trend = iCustom(Symbol(), MqlApi.PERIOD_D1, "FXEdgeTrend_noDraw", 0, 0, 0);
+            double trend = trend = iCustom(Symbol(), MqlApi.PERIOD_M30, "FXEdgeTrend_noDraw", 0, 0, 0);
             //new bar?
             if (!bartime.Equals(Time[0]))
             {
@@ -162,13 +162,13 @@ namespace biiuse
                             double prevDayRange = prevDayHH - prevDayLL;
                             string sessionStatus = "";
 
-                            if (prevDayRange >= atr)
+                            if ((prevDayRange >= atr) && (false))
                             {
                                 sessionStatus = ("Yesterday's sessions's range (" + prevDayRange.ToString("F5") +  ") is greated than ATR (" + atr.ToString("F5") + "). No trades will be taken in this Session)");
                                 currSession.tradingAllowed(false);
                             }
 
-                            else if (atr > overallRange * this.maxATROR_TREND)
+                            else if ((atr > overallRange * this.maxATROR_TREND) && (false))
                             {
                                 sessionStatus = ("ATR (" + atr.ToString("F5") + ") is greater than " + maxATROR_TREND * 100 + "% of the overall range (" + overallRange.ToString("F5") + "). No trades will be taken in this Session)");
                                 currSession.tradingAllowed(false);
@@ -293,11 +293,12 @@ namespace biiuse
                     double sessionHigh = iHigh(Symbol(), MqlApi.PERIOD_D1, 0);
                     double sessionLow = iLow(Symbol(), MqlApi.PERIOD_D1, 0);
                     
-                    if ((currentPrice > currSession.getPrevDayHigh()) && (Ask >= sessionHigh) && !sameDirectionTradeAlreadyOpen(TradeType.LONG) && (trend == 1.0)) {
-
-
-
-
+                    if ((currentPrice > currSession.getPrevDayHigh()) && 
+                        (Ask >= sessionHigh) && 
+                        (!sameDirectionTradeAlreadyOpen(TradeType.SHORT)) && 
+                        (!tradeOpenInSameSession(currSession))) {
+                        
+                        /*
                         //Look to go LONG
                         if (OrderManager.existsActiveLongOrderWithMagicNumber(magicNumberTrendLong, this)) {
                             currSession.addLogEntry(2, "New Long break-out found - but already LONG (NO TRADE)",
@@ -305,22 +306,28 @@ namespace biiuse
                                                       "Long order already exists - No trade is inititad"
                                                       );
                         } else
+                        */
                         {
                             currSession.addLogEntry(2, "New Long break-out found - start clock",
                                                       "New high: ", currentPrice.ToString("F5"), "\n",
                                                       "Start 10min clock"
                                                       );
 
-                            BOTrade trade = new BOTrade(strategyLabel, magicNumberTrendLong, TradeType.LONG, lotDigits, lengthOfGracePeriod, maxBalanceRisk, logFileName, rangeBuffer, lookbackDaysForStopLossAdjustment, currSession.getATR(), emailNotificationLevel, this);
+                            BOTrade trade = new BOTrade(strategyLabel, magicNumberTrendLong, TradeType.LONG, lotDigits, lengthOfGracePeriod, maxBalanceRisk, logFileName, rangeBuffer, lookbackDaysForStopLossAdjustment, currSession.getATR(), currSession.getPrevDayHigh() - currSession.getPrevDayLow(), currSession.getLongTermATR(), emailNotificationLevel, this);
                             trade.setState(new BreakOutOccuredEstablishingEligibilityRange(trade, currentPrice, Math.Min(currSession.getPrevDayLow(), sessionLow), this));
                             trades.Add(trade);
                         }
                         
                     }
 
-                    if ((currentPrice < currSession.getPrevDayLow()) && (Bid <= sessionLow) && !sameDirectionTradeAlreadyOpen(TradeType.SHORT) && (trend == -1.0))
+                    if ((currentPrice < currSession.getPrevDayLow()) && 
+                        (Bid <= sessionLow) && 
+                        (!sameDirectionTradeAlreadyOpen(TradeType.LONG)) && 
+                        (!tradeOpenInSameSession(currSession)))
                     {
                         //Look to go SHORT
+
+                        /*
                         if (OrderManager.existsActiveLongOrderWithMagicNumber(magicNumberTrendShort, this))
                         {
                             currSession.addLogEntry(2, "New Short break-out found - but already SHORT (NO TRADE)",
@@ -328,14 +335,17 @@ namespace biiuse
                                                       "Short order already exists - No trade is inititad"
                                                       );
                         }
+                        
+                        
                         else
+                        */
                         {
                             currSession.addLogEntry(2, "New Short break-out found - start clock",
                                                       "New low: ", currentPrice.ToString("F5"), "\n",
                                                       "Start 10min clock"
                                                       );
 
-                            BOTrade trade = new BOTrade(strategyLabel, magicNumberTrendShort, TradeType.SHORT, lotDigits, lengthOfGracePeriod, maxBalanceRisk, logFileName, rangeBuffer, lookbackDaysForStopLossAdjustment, currSession.getATR(), emailNotificationLevel, this);
+                            BOTrade trade = new BOTrade(strategyLabel, magicNumberTrendShort, TradeType.SHORT, lotDigits, lengthOfGracePeriod, maxBalanceRisk, logFileName, rangeBuffer, lookbackDaysForStopLossAdjustment, currSession.getATR(), currSession.getPrevDayHigh() - currSession.getPrevDayLow(), currSession.getLongTermATR(), emailNotificationLevel, this);
                             trade.setState(new BreakOutOccuredEstablishingEligibilityRange(trade, Math.Max(currSession.getPrevDayHigh(), sessionHigh), currentPrice, this));
                             trades.Add(trade);
                         }
@@ -356,13 +366,20 @@ namespace biiuse
         {
             foreach (var trade in trades)
             {
-                if ((trade != null) /* && (trade.getTradeType() == type) */ && (!trade.isInFinalState())) return true;
+                if ((trade != null) && (trade.getTradeType() == type) && (!trade.isInFinalState())) return true;
             }
             return false;
-
         }
 
-
+        private bool tradeOpenInSameSession(Session curSess)
+        {
+            foreach (var trade in trades)
+            {
+                if ((trade != null) && (!trade.isInFinalState()) && (trade.getTradeOpenedDate() > curSess.getSessionStartTime())) return true;
+            }
+            return false;
+        }
+        
         private bool simOrder(bool isLong)
         {
             int tradesAnalyzed = 0;

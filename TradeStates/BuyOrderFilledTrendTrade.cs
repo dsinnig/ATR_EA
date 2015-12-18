@@ -46,31 +46,40 @@ namespace biiuse
 
             if ((mql4.iTime(null, MqlApi.PERIOD_D1, 0) - this.startOfCurDailyBar) > TimeSpan.FromHours(1)) {
 
+                //get daily bar since trend started
+                int shift = mql4.iBarShift(null, MqlApi.PERIOD_D1, context.getTradeOpenedDate(), false);
+
+                double tradeHigh = 0.0;
+                for (int i = 2; i <= shift; ++i)
+                {
+                    double sessionHigh = mql4.iHigh(null, MqlApi.PERIOD_D1, i);
+                    if (sessionHigh > tradeHigh) tradeHigh = sessionHigh;
+                }
+                
                 this.startOfCurDailyBar = mql4.iTime(null, MqlApi.PERIOD_D1, 0);
 
                 double prevprevDayHigh = mql4.iHigh(null, MqlApi.PERIOD_D1, 2);
-                double prevprevDayLow = mql4.iLow(null, MqlApi.PERIOD_D1, 2);
+                double prevDayLow = mql4.iLow(null, MqlApi.PERIOD_D1, 1);
                 double closePrevDay = mql4.iClose(null, MqlApi.PERIOD_D1, 1);
 
                 //double prevDayLL = mql4.iLow(mql4.Symbol(), MqlApi.PERIOD_D1, context.getLookBackDaysForStopLossAdjustment());
                 double buffer = context.getRangeBufferInMicroPips() / OrderManager.getPipConversionFactor(mql4); ///Check for 3 digit pais
                 //double oneMicroPip = 1 / OrderManager.getPipConversionFactor(mql4);
                 //if ((prevDayLL - buffer > (context.getStopLoss() + oneMicroPip)) && (mql4.Bid > (prevDayLL - buffer)) && (Math.Abs((prevDayLL - buffer) - mql4.Bid) > context.getATR()))
-                if ((closePrevDay > prevprevDayHigh) && (prevprevDayLow - buffer > context.getStopLoss()))
-
+                if ((closePrevDay > prevprevDayHigh) && (prevDayLow - buffer > context.getStopLoss()) && (closePrevDay > tradeHigh))
                 {
                     //adjust stop loss to prevDayLL
                     context.addLogEntry(1, "Adjust stop loss to previous days's low (minus buffer)",
-                                           "Previous day's low is: " + mql4.DoubleToString(prevprevDayLow, mql4.Digits), "\n",
-                                           "New stop loss (low-buffer): ", mql4.NormalizeDouble(prevprevDayLow - buffer, mql4.Digits)
+                                           "Previous day's low is: " + mql4.DoubleToString(prevDayLow, mql4.Digits), "\n",
+                                           "New stop loss (low-buffer): ", mql4.NormalizeDouble(prevDayLow - buffer, mql4.Digits)
                                                    );
 
-                    ErrorType result = context.Order.modifyOrder(context.Order.getOrderOpenPrice(), mql4.NormalizeDouble(prevprevDayLow - buffer, mql4.Digits), 0);
+                    ErrorType result = context.Order.modifyOrder(context.Order.getOrderOpenPrice(), mql4.NormalizeDouble(prevDayLow - buffer, mql4.Digits), 0);
 
 
                     if (result == ErrorType.NO_ERROR)
                     {
-                        context.setStopLoss(mql4.NormalizeDouble(prevprevDayLow - buffer, mql4.Digits));
+                        context.setStopLoss(mql4.NormalizeDouble(prevDayLow - buffer, mql4.Digits));
                         context.addLogEntry("Stop loss succssfully adjusted", true);
                     }
 
@@ -89,13 +98,6 @@ namespace biiuse
                 }
 
             }
-
-            
-
-
-            
         }
-
-
     }
 }
