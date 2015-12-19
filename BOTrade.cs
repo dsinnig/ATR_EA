@@ -31,6 +31,34 @@ namespace biiuse
             this._4HTrend = doubleToTrend(mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_H4, "FXEdgeTrend_noDraw", 0, 0, 0));
             this._1DTrend = doubleToTrend(mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_D1, "FXEdgeTrend_noDraw", 0, 0, 0));
             this._1WTrend = doubleToTrend(mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_W1, "FXEdgeTrend_noDraw", 0, 0, 0));
+
+            this.highestHighSinceOpen = 0;
+            this.lowestLowSinceOpen = 9999;
+        }
+
+        public override void update()
+        {
+            base.update();
+
+            if ((!isInFinalState()) && isNewBar()) {
+
+                //get daily bar since trend started
+                int shift = mql4.iBarShift(null, MqlApi.PERIOD_D1, this.tradeOpenedDate, false);
+
+                double tradeLow = 9999;
+                double tradeHigh = 0;
+                for (int i = 1; i <= shift; ++i)
+                {
+                    double sessionLow = mql4.iLow(null, MqlApi.PERIOD_D1, i);
+                    double sessionHigh = mql4.iHigh(null, MqlApi.PERIOD_D1, i);
+                    if (sessionLow < tradeLow) tradeLow = sessionLow;
+                    if (sessionHigh > tradeHigh) tradeHigh = sessionHigh;
+                }
+
+                if (tradeHigh > highestHighSinceOpen) highestHighSinceOpen = tradeHigh;
+                if (tradeLow < lowestLowSinceOpen) lowestLowSinceOpen = tradeLow;
+            }
+
         }
 
         public int getMagicNumber()
@@ -41,6 +69,17 @@ namespace biiuse
         public double getATR()
         {
             return atr;
+        }
+
+
+        public double getHighestHighSinceOpen()
+        {
+            return this.highestHighSinceOpen;
+        }
+
+        public double getLowestLowSinceOpen()
+        {
+            return this.lowestLowSinceOpen;
         }
 
         public int getLengthIn1MBarsOfWaitingPeriod()
@@ -85,6 +124,19 @@ namespace biiuse
             mql4.FileClose(filehandle);
         }
 
+        private bool isNewBar()
+        {
+            DateTime curbar = mql4.Time[0];
+            if (lastbar != curbar)
+            {
+                lastbar = curbar;
+                return (true);
+            }
+            else
+            {
+                return (false);
+            }
+        }
 
         private int magicNumber;
         private int lengthIn1MBarsOfWaitingPeriod;
@@ -101,5 +153,9 @@ namespace biiuse
         private Trend _4HTrend;
         private Trend _1DTrend;
         private Trend _1WTrend;
+        private double highestHighSinceOpen;
+        private double lowestLowSinceOpen;
+
+        private System.DateTime lastbar = new System.DateTime();
     }
 }

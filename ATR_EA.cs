@@ -293,10 +293,11 @@ namespace biiuse
                     double sessionHigh = iHigh(Symbol(), MqlApi.PERIOD_D1, 0);
                     double sessionLow = iLow(Symbol(), MqlApi.PERIOD_D1, 0);
                     
-                    if ((currentPrice > currSession.getPrevDayHigh()) && 
-                        (Ask >= sessionHigh) && 
-                        (!sameDirectionTradeAlreadyOpen(TradeType.SHORT)) && 
-                        (!tradeOpenInSameSession(currSession))) {
+                    if ((currentPrice > currSession.getPrevDayHigh()))                        
+                        if ((Ask >= sessionHigh) &&
+                        highGreaterThanHighestHighOfAllOpenTradesInSameDirection(Ask) &&
+                        //(!sameDirectionTradeAlreadyOpen(TradeType.SHORT)) && 
+                        (!tradeOpenInSameSessionInSameDirection(currSession, TradeType.LONG))) {
                         
                         /*
                         //Look to go LONG
@@ -308,10 +309,12 @@ namespace biiuse
                         } else
                         */
                         {
-                            currSession.addLogEntry(2, "New Long break-out found - start clock",
+                            currSession.addLogEntry(2, "New Long break-out found - deleting all opposing trades and start clock",
                                                       "New high: ", currentPrice.ToString("F5"), "\n",
                                                       "Start 10min clock"
                                                       );
+
+                            deleteCloseAllOrdersOfType(TradeType.SHORT);
 
                             BOTrade trade = new BOTrade(strategyLabel, magicNumberTrendLong, TradeType.LONG, lotDigits, lengthOfGracePeriod, maxBalanceRisk, logFileName, rangeBuffer, lookbackDaysForStopLossAdjustment, currSession.getATR(), currSession.getPrevDayHigh() - currSession.getPrevDayLow(), currSession.getLongTermATR(), emailNotificationLevel, this);
                             trade.setState(new BreakOutOccuredEstablishingEligibilityRange(trade, currentPrice, Math.Min(currSession.getPrevDayLow(), sessionLow), this));
@@ -320,10 +323,12 @@ namespace biiuse
                         
                     }
 
-                    if ((currentPrice < currSession.getPrevDayLow()) && 
+                    if ((currentPrice < currSession.getPrevDayLow()))
+                        if (
                         (Bid <= sessionLow) && 
-                        (!sameDirectionTradeAlreadyOpen(TradeType.LONG)) && 
-                        (!tradeOpenInSameSession(currSession)))
+                        //(!sameDirectionTradeAlreadyOpen(TradeType.LONG)) && 
+                        lowLessThanLowestLowOfAllOpenTradesInSameDirection(Bid) &&
+                        (!tradeOpenInSameSessionInSameDirection(currSession, TradeType.SHORT)))
                     {
                         //Look to go SHORT
 
@@ -340,10 +345,12 @@ namespace biiuse
                         else
                         */
                         {
-                            currSession.addLogEntry(2, "New Short break-out found - start clock",
+                            currSession.addLogEntry(2, "New Short break-out found - deleting all opposing trades and start clock",
                                                       "New low: ", currentPrice.ToString("F5"), "\n",
                                                       "Start 10min clock"
                                                       );
+
+                            deleteCloseAllOrdersOfType(TradeType.LONG);
 
                             BOTrade trade = new BOTrade(strategyLabel, magicNumberTrendShort, TradeType.SHORT, lotDigits, lengthOfGracePeriod, maxBalanceRisk, logFileName, rangeBuffer, lookbackDaysForStopLossAdjustment, currSession.getATR(), currSession.getPrevDayHigh() - currSession.getPrevDayLow(), currSession.getLongTermATR(), emailNotificationLevel, this);
                             trade.setState(new BreakOutOccuredEstablishingEligibilityRange(trade, Math.Max(currSession.getPrevDayHigh(), sessionHigh), currentPrice, this));
@@ -351,16 +358,79 @@ namespace biiuse
                         }
 
                     }
-
-
-
                 }
-                   
             }
-
-
             return base.start();
         }
+        
+        private bool highGreaterThanHighestHighOfAllOpenTradesInSameDirection(double high)
+        {
+            double allTradesHigh = 0;
+            foreach (var trade in trades)
+            {
+                BOTrade tr = (BOTrade)trade;
+                if ((tr != null) && (!tr.isInFinalState()) && (tr.getTradeType() == TradeType.LONG))
+                {
+                    if (tr.getHighestHighSinceOpen() > allTradesHigh) allTradesHigh = tr.getHighestHighSinceOpen();
+                }
+            }
+            return high > allTradesHigh;
+        }
+
+        private bool lowLessThanLowestLowOfAllOpenTradesInSameDirection(double low)
+        {
+            double allTradesLow = 9999;
+            foreach (var trade in trades)
+            {
+                BOTrade tr = (BOTrade)trade;
+                if ((tr != null) && (!tr.isInFinalState()) && (tr.getTradeType() == TradeType.SHORT))
+                {
+                    if (tr.getLowestLowSinceOpen() < allTradesLow) allTradesLow = tr.getLowestLowSinceOpen();
+                }
+            }
+            return low < allTradesLow;
+        }
+
+        private void deleteCloseAllOrdersOfType(TradeType type)
+        {
+            if (type == TradeType.LONG)
+            {
+                foreach (var trade in trades)
+                {
+                    if ((trade != null) && (!trade.isInFinalState())) {
+                        if ((trade.Order.OrderType == biiuse.OrderType.BUY_LIMIT) || ((trade.Order.OrderType == biiuse.OrderType.BUY_STOP))) {
+                            trade.Order.deleteOrder();
+                            trade.setState(new TradeClosed(trade, this));
+                        }
+                        if (trade.Order.OrderType == biiuse.OrderType.BUY)
+                        {
+                            trade.Order.closeOrder();
+                            trade.setState(new TradeClosed(trade, this));
+                        }
+                    }
+                }
+            }
+            if (type == TradeType.SHORT)
+            {
+                foreach (var trade in trades)
+                {
+                    if ((trade != null) && (!trade.isInFinalState()))
+                    {
+                        if ((trade.Order.OrderType == biiuse.OrderType.SELL_LIMIT) || ((trade.Order.OrderType == biiuse.OrderType.SELL_STOP))) {
+                            trade.Order.deleteOrder();
+                            trade.setState(new TradeClosed(trade, this));
+                        }
+                        if (trade.Order.OrderType == biiuse.OrderType.SELL)
+                        {
+                            trade.Order.closeOrder();
+                            trade.setState(new TradeClosed(trade, this));
+                        }
+                    }
+                }
+            }
+
+        }
+
 
         private bool sameDirectionTradeAlreadyOpen(TradeType type)
         {
@@ -371,11 +441,11 @@ namespace biiuse
             return false;
         }
 
-        private bool tradeOpenInSameSession(Session curSess)
+        private bool tradeOpenInSameSessionInSameDirection(Session curSess, TradeType type)
         {
             foreach (var trade in trades)
             {
-                if ((trade != null) && (!trade.isInFinalState()) && (trade.getTradeOpenedDate() > curSess.getSessionStartTime())) return true;
+                if ((trade != null) && (!trade.isInFinalState()) && (trade.getTradeOpenedDate() > curSess.getSessionStartTime()) && (trade.getTradeType() == type)) return true;
             }
             return false;
         }
@@ -611,7 +681,6 @@ namespace biiuse
             }
             return base.deinit();
         }
-
 
         private ATR_Type intToATR_Type(int atr)
         {

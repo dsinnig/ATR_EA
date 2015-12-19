@@ -11,7 +11,7 @@ namespace biiuse
         {
             this.context = aContext;
             context.setOrderFilledDate(mql4.TimeCurrent());
-            context.Order.OrderType = OrderType.BUY;
+            context.Order.OrderType = OrderType.SELL;
             this.startOfCurDailyBar = mql4.iTime(null, MqlApi.PERIOD_D1, 0);
         }
 
