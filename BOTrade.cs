@@ -23,14 +23,15 @@ namespace biiuse
             this.atr = _atr;
             this.currentSessionRange = _currentSessionRange;
             this.overallRange = _overallRange;
-            this._1MTrend = doubleToTrend(mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_M1, "FXEdgeTrend_noDraw", 0, 0, 0));
-            this._5MTrend = doubleToTrend(mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_M5, "FXEdgeTrend_noDraw", 0, 0, 0));
-            this._15MTrend = doubleToTrend(mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_M15, "FXEdgeTrend_noDraw", 0, 0, 0));
-            this._30MTrend = doubleToTrend(mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_M30, "FXEdgeTrend_noDraw", 0, 0, 0));
-            this._1HTrend = doubleToTrend(mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_H1, "FXEdgeTrend_noDraw", 0, 0, 0));
-            this._4HTrend = doubleToTrend(mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_H4, "FXEdgeTrend_noDraw", 0, 0, 0));
-            this._1DTrend = doubleToTrend(mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_D1, "FXEdgeTrend_noDraw", 0, 0, 0));
-            this._1WTrend = doubleToTrend(mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_W1, "FXEdgeTrend_noDraw", 0, 0, 0));
+
+            this._1MTrend = mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_M1, "FXEdgeTrendAverage", 20, 0, 0);
+            this._5MTrend = mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_M5, "FXEdgeTrendAverage", 20, 0, 0);
+            this._15MTrend = mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_M15, "FXEdgeTrendAverage", 20, 0, 0);
+            this._30MTrend = mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_M30, "FXEdgeTrendAverage", 20, 0, 0);
+            this._1HTrend = mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_H1, "FXEdgeTrendAverage", 20, 0, 0);
+            this._4HTrend = mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_H4, "FXEdgeTrendAverage", 20, 0, 0);
+            this._1DTrend = mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_D1, "FXEdgeTrendAverage", 20, 0, 0);
+            this._1WTrend = mql4.iCustom(mql4.Symbol(), MqlApi.PERIOD_W1, "FXEdgeTrendAverage", 20, 0, 0);
 
             this.highestHighSinceOpen = 0;
             this.lowestLowSinceOpen = 9999;
@@ -145,14 +146,14 @@ namespace biiuse
         private double atr;
         private double currentSessionRange;
         private double overallRange;
-        private Trend _1MTrend;
-        private Trend _5MTrend;
-        private Trend _15MTrend;
-        private Trend _30MTrend;
-        private Trend _1HTrend;
-        private Trend _4HTrend;
-        private Trend _1DTrend;
-        private Trend _1WTrend;
+        private double _1MTrend;
+        private double _5MTrend;
+        private double _15MTrend;
+        private double _30MTrend;
+        private double _1HTrend;
+        private double _4HTrend;
+        private double _1DTrend;
+        private double _1WTrend;
         private double highestHighSinceOpen;
         private double lowestLowSinceOpen;
 

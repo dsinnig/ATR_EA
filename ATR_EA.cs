@@ -90,7 +90,7 @@ namespace biiuse
         public override int start()
         {
 
-            double trend = trend = iCustom(Symbol(), MqlApi.PERIOD_M30, "FXEdgeTrend_noDraw", 0, 0, 0);
+            //double trend = trend = iCustom(Symbol(), MqlApi.PERIOD_M30, "FXEdgeTrend_noDraw", 0, 0, 0);
             //new bar?
             if (!bartime.Equals(Time[0]))
             {
@@ -187,9 +187,10 @@ namespace biiuse
                                                           sessionStatus
                                   );
                             
-                            if (trend == -1.0) Print("TREND IS DOWN");
+                            /*if (trend == -1.0) Print("TREND IS DOWN");
                             if (trend == 0) Print("TREND IS SIDE");
                             if (trend == 1.0) Print("TREND IS UP");
+                            */
                         }
                     }
                 }
